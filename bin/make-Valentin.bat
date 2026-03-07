@@ -1,0 +1,2 @@
+SolutionGenerator.exe -bp -make 22222222-BBBB-BBBB-BBBB-222222222222
+PAUSE

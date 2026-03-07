@@ -1,0 +1,92 @@
+{
+  "buttons": [
+    {
+      "id": "button_2",
+      "pos": {
+        "x": 0.7291666666666666,
+        "y": 0.2777777777777778,
+        "z": 0
+      },
+      "size": {
+        "x": 560,
+        "y": 85,
+        "z": 0
+      },
+      "name": "res/Ui/UiTextures/Default1.png",
+      "listenerList": [],
+      "hover": "res/Ui/UiTextures/Hover1.png",
+      "animated": false,
+      "frameCount": 1,
+      "currentFrame": 0,
+      "frameSize": {
+        "x": 110,
+        "y": 100
+      },
+      "looping": false,
+      "frameRate": 0
+    },
+    {
+      "id": "button_3",
+      "pos": {
+        "x": 0.7291666666666666,
+        "y": 0.42592592592592593,
+        "z": 0
+      },
+      "size": {
+        "x": 560,
+        "y": 85,
+        "z": 0
+      },
+      "name": "res/Ui/UiTextures/Default5.png",
+      "listenerList": [],
+      "hover": "res/Ui/UiTextures/Hover5.png",
+      "animated": false,
+      "frameCount": 1,
+      "currentFrame": 0,
+      "frameSize": {
+        "x": 110,
+        "y": 100
+      },
+      "looping": false,
+      "frameRate": 0
+    }
+  ],
+  "images": [
+    {
+      "id": "image_1",
+      "pos": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0
+      },
+      "size": {
+        "x": 1920,
+        "y": 1080,
+        "z": 0
+      },
+      "name": "res/Ui/UiTextures/Background.png",
+      "animated": false,
+      "frameCount": 1,
+      "currentFrame": 0,
+      "frameSize": {
+        "x": 110,
+        "y": 100
+      },
+      "looping": false,
+      "frameRate": 0
+    }
+  ],
+  "texts": [],
+  "layers": [
+    {
+      "id": "default",
+      "name": "Calque par défaut",
+      "visible": true,
+      "elementIds": [
+        "image_1",
+        "button_2",
+        "button_3"
+      ]
+    }
+  ]
+}
