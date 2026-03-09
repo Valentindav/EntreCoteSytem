@@ -38,9 +38,9 @@ public:
         else {
             xOffset = 0.3f;
         }
-        owner->transform.SetWorldPosition({bodyPos.x + xOffset,bodyPos.y + 1.0f + verticalOffset,bodyPos.z});
+        owner->transform.SetWorldPosition({bodyPos.x-0.25f + xOffset,bodyPos.y + verticalOffset,bodyPos.z});
 
-        owner->transform.SetWorldRotation({ 180.0f, 110.0f, 0.0f });
+        //owner->transform.SetWorldRotation({ 180.0f, 110.0f, 0.0f });
         owner->transform.SetWorldScale({ 0.4f, 0.4f, 0.4f });
     }
 

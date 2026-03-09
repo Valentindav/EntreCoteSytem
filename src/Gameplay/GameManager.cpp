@@ -39,65 +39,73 @@ void GameManager::InitEntities()
     m_rail->maxPitchDelta = 0.22f;
     m_rail->maxRollDelta = 0.28f;
 
-	//-------Create Seagull so no lag------   
-	Entity* Seagull = ECS_ECS->CreateEntity();
+    ////-------Create Seagull so no lag------   
+    //Entity* Seagull = ECS_ECS->CreateEntity();
 
-    MeshComponent* meshSeagull = ecs->AddComponents<MeshComponent>(Seagull);
-    meshSeagull->LoadMesh("../../res/seagull.m3d");
-    Seagull->transform.SetWorldPosition({ 0.f, -100000.f, 0.f });
+ //   MeshComponent* meshSeagull = ecs->AddComponents<MeshComponent>(Seagull);
+ //   meshSeagull->LoadMesh("../../res/seagull.m3d");
+ //   Seagull->transform.SetWorldPosition({ 0.f, -100000.f, 0.f });
 
-    AnimatorComponent* animatorSeagull = ECS_ECS->AddComponents<AnimatorComponent>(Seagull);
-    animatorSeagull->LoadSkeleton("../../res/seagull.m3d");
-    animatorSeagull->Play("ArmatureAction.001", true, 1.0f);
+ //   AnimatorComponent* animatorSeagull = ECS_ECS->AddComponents<AnimatorComponent>(Seagull);
+ //   animatorSeagull->LoadSkeleton("../../res/seagull.m3d");
+ //   animatorSeagull->Play("ArmatureAction.001", true, 1.0f);
 
-    MaterialComponent* matSeagull = ECS_ECS->AddComponents<MaterialComponent>(Seagull);
-    matSeagull->LoadTexture("../../res/SeagullTexture.png");
+ //   MaterialComponent* matSeagull = ECS_ECS->AddComponents<MaterialComponent>(Seagull);
+ //   matSeagull->LoadTexture("../../res/SeagullTexture.png");
 
-	ECS_ECS->DestroyEntity(Seagull);
+    //ECS_ECS->DestroyEntity(Seagull);
     // --- Entity 1 (Joueur) ---
 
-	Player = ECS_ECS->CreateEntity();
+    four = ECS_ECS->CreateEntity();
 
-	MeshComponent* mesh1 = ecs->AddComponents<MeshComponent>(Player);
-	mesh1->LoadMesh("../../res/Boat.obj");
+    MeshComponent* mesh1 = ecs->AddComponents<MeshComponent>(four);
+    mesh1->LoadMesh("../../res/Four.obj");
 
-    PlayerId = Player->GetId();
-    Player->SetType(Entity::TYPE::Player);
-	Player->transform.SetWorldScale({ 0.5f, 0.5f, 0.5f });
+    four->SetType(Entity::TYPE::Player);
+    four->transform.SetWorldScale({ 1.f, 1.f, 1.f });
+    four->transform.SetWorldPosition({0, 1, 0});
+    MaterialComponent* mat1 = ecs->AddComponents<MaterialComponent>(four);
+    mat1->LoadTexture("../../res/KitchenMachinery_B_basecolor.png");
 
-    MaterialComponent* mat1 = ecs->AddComponents<MaterialComponent>(Player);
-    mat1->LoadTexture("../../res/Boat.png");
-
-    RigidBodyComponent* rb1 = ecs->AddComponents<RigidBodyComponent>(Player);
+    RigidBodyComponent* rb1 = ecs->AddComponents<RigidBodyComponent>(four);
     rb1->m_motionType = MotionType::Kinematic;
 
-    ColliderComponent* collider1 = ecs->AddComponents<ColliderComponent>(Player);
+    ColliderComponent* collider1 = ecs->AddComponents<ColliderComponent>(four);
     collider1->SetAsBox({ 0.5f, 0.5f, 0.5f });
 
-    ScriptComponent* script1 = ecs->AddComponents<ScriptComponent>(Player);
-    script1->SetScript<ShootScript>();
 
-    ScriptComponent* scriptLife = ecs->AddComponents<ScriptComponent>(Player);
-    scriptLife->SetScript<LifeScript>();
+    Sol = ECS_ECS->CreateEntity();
 
-    ScriptComponent* scriptPoint = ecs->AddComponents<ScriptComponent>(Player);
-    scriptPoint->SetScript<PointScript>();
+    MeshComponent* mesh2 = ecs->AddComponents<MeshComponent>(Sol);
+    mesh2->LoadMesh("cube");
 
-    ScriptComponent* followerComp = ecs->AddComponents<ScriptComponent>(Player);
-    followerComp->SetScript<RailFollower>();
-    RailFollower* rf = static_cast<RailFollower*>(followerComp->m_instance);
-    rf->spline = m_rail;
+    
+    Sol->transform.SetWorldScale({ 10.f, 0.02f, 10.f });
 
-    ScriptComponent* spawnerComp = ecs->AddComponents<ScriptComponent>(Player);
-    spawnerComp->SetScript<EnemySpawner>();
-    EnemySpawner* es = static_cast<EnemySpawner*>(spawnerComp->m_instance);
-    es->spline = m_rail;
-    es->railFollower = static_cast<RailFollower*>(followerComp->m_instance);
+    MaterialComponent* mat2 = ecs->AddComponents<MaterialComponent>(Sol);
+    mat2->LoadTexture("../../res/Sol.png");
+
+    RigidBodyComponent* rb2 = ecs->AddComponents<RigidBodyComponent>(Sol);
+    rb2->m_motionType = MotionType::Static;
+
+    ColliderComponent* collider2 = ecs->AddComponents<ColliderComponent>(Sol);
+    collider2->SetAsBox({ 10.f, 0.02f, 10.f });
+
+
+
 
 	//------Sushi------
     Sushi = ECS_ECS->CreateEntity();
+    PlayerId = Sushi->GetId();
     MeshComponent* meshSushi = ecs->AddComponents<MeshComponent>(Sushi);
     meshSushi->LoadMesh("../../res/sushiBody.obj");
+
+
+    RigidBodyComponent* rb3 = ecs->AddComponents<RigidBodyComponent>(Sushi);
+    rb2->m_motionType = MotionType::Static;
+
+    ColliderComponent* collider3 = ecs->AddComponents<ColliderComponent>(Sushi);
+    collider2->SetAsBox({ 1.f, 3.f, 1.f });
 
     MaterialComponent* matSushi = ecs->AddComponents<MaterialComponent>(Sushi);
     matSushi->LoadTexture("../../res/Sushi.png");
@@ -112,7 +120,7 @@ void GameManager::InitEntities()
     ScriptComponent* rightArmScript = ecs->AddComponents<ScriptComponent>(SushiRightArm);
     rightArmScript->SetScript<SushiArmScript>();
     SushiArmScript* rightArm = static_cast<SushiArmScript*>(rightArmScript->m_instance);
-    rightArm->bodyEntity = Player;
+    rightArm->bodyEntity = Sushi;
     rightArm->isLeftArm = false;
 
 	//------Sushi LeftArms------
@@ -126,28 +134,27 @@ void GameManager::InitEntities()
     ScriptComponent* leftArmScript = ecs->AddComponents<ScriptComponent>(SushiLeftArm);
     leftArmScript->SetScript<SushiArmScript>();
     SushiArmScript* leftArm = static_cast<SushiArmScript*>(leftArmScript->m_instance);
-    leftArm->bodyEntity = Player;
+    leftArm->bodyEntity = Sushi;
     leftArm->isLeftArm = true;
 
     //-------Sushi pos------------
-	XMFLOAT3 pos = Player->transform.GetWorldPosition();
-    Sushi->transform.SetWorldPosition({ pos.x + 0.25f,pos.y + 1.f,pos.z });
+	XMFLOAT3 pos = Sushi->transform.GetWorldPosition();
+    Sushi->transform.SetWorldPosition({ pos.x + 0.25f,pos.y + 10.f,pos.z });
 	Sushi->transform.SetWorldScale({ 0.4f,0.4f,0.4f });
     Sushi->transform.SetWorldRotation({ 0.f, 110.f, 0.f });
 
 
-    Player->AddChild(SushiRightArm);
-    Player->AddChild(SushiLeftArm);
-    Player->AddChild(Sushi);
+    Sushi->AddChild(SushiRightArm);
+    Sushi->AddChild(SushiLeftArm);
 }
 
 void GameManager::InitCameras()
 {
     // --- Camera 1 ---
     Entity* cam1 = ECS_ECS->GetComponents<CameraComponent>()[0]->GetOwner();
-    Player->AddChild(cam1);
+    Sushi->AddChild(cam1);
 
-    XMFLOAT3 playerPos = Player->transform.GetWorldPosition();
+    XMFLOAT3 playerPos = Sushi->transform.GetWorldPosition();
     cam1->transform.SetWorldPosition(playerPos);
     cam1->transform.SetLocalPosition({ 0, 4.0f, -7.f });
     cam1->transform.LookAt({ playerPos.x, playerPos.y + 1, playerPos.z });
@@ -155,7 +162,7 @@ void GameManager::InitCameras()
     // --- Camera 2 ---
     Entity* cam2 = Camera::Camera(0.73f, 0.73f, 0.25f, 0.25f, 1);
     cam2->transform.SetWorldPosition({ 0.0f, 5.0f, -10.0f });
-    cam2->transform.LookAt(Player->transform.GetWorldPosition());
+    cam2->transform.LookAt(Sushi->transform.GetWorldPosition());
 
     cameras.push_back(cam1);
     cameras.push_back(cam2);
@@ -181,14 +188,18 @@ void GameManager::InitUis()
 
 void GameManager::Update(const GameTimer& gt)
 {
-    if (PlayerId >= 0) {
-        Player = ECS_ECS->GetEntity(PlayerId);
-    }
-    else {
-        Player = nullptr;
-    }
+   
+    float x = radius * sinf(phi) * cosf(theta);
+    float z = radius * sinf(phi) * sinf(theta);
+    float y = radius * cosf(phi);
 
-    if (!Player && !m_playerDead || Inputs::IsKeyDown(Keyboard::R))
+    cameras[0]->transform.SetWorldPosition({ x, y, z });
+
+    if (Sushi) {
+        cameras[0]->transform.LookAt(Sushi->transform.GetWorldPosition());
+    }
+  
+    if (!Sushi && !m_playerDead || Inputs::IsKeyDown(Keyboard::R))
     {
         m_playerDead = true;
         m_replay.StopRecording();
@@ -206,38 +217,7 @@ void GameManager::Update(const GameTimer& gt)
         }
     }
 
-    if (m_replay.state == Replay::State::Replaying)
-    {
-        bool stillPlaying = m_replay.ReplayFrame();
-
-        DirectX::XMFLOAT3 center = m_replay.GetCurrentPlayerPos();
-
-        if (Inputs::IsMousePressed(Mouse::LEFT))
-        {
-            DirectX::XMFLOAT2 mouseDelta = Inputs::GetMouseDelta();
-            m_replayTheta += XMConvertToRadians(0.25f * mouseDelta.x);
-            m_replayPhi += XMConvertToRadians(0.25f * mouseDelta.y);
-            if (m_replayPhi < 0.1f) m_replayPhi = 0.1f;
-            if (m_replayPhi > XM_PI - 0.1f) m_replayPhi = XM_PI - 0.1f;
-        }
-
-        float x = m_replayRadius * sinf(m_replayPhi) * sinf(m_replayTheta);
-        float y = m_replayRadius * cosf(m_replayPhi);
-        float z = m_replayRadius * sinf(m_replayPhi) * cosf(m_replayTheta);
-
-        if (cameras[1])
-        {
-            cameras[1]->transform.SetWorldPosition({ center.x + x, center.y + y, center.z + z });
-            cameras[1]->transform.LookAt(center);
-        }
-
-        if (!stillPlaying) m_playerDead = false;
-        return;
-    }
-
-    if (m_replay.state == Replay::State::Recording)
-        m_replay.RecordFrame();
-
+ 
     if (Inputs::IsKeyDown(Keyboard::T))
     {
         ECS_APP->GetTimer().ToggleSlowTimeDown();
@@ -256,16 +236,26 @@ void GameManager::Update(const GameTimer& gt)
             textComp->m_text = text;
         }
     }
-    if (Player)
+    if (Sushi)
     {
         float rotSpeed = m_speed * dt;
         XMFLOAT3 deltaMove = { 0,0,0 };
  
         // Rotation Cube
         if (Inputs::IsKeyPressed(Keyboard::LEFT_ARROW))
-            Player->transform.WorldRotate({ 0, -rotSpeed, 0 });
+            Sushi->transform.WorldRotate({ 0, -rotSpeed, 0 });
         if (Inputs::IsKeyPressed(Keyboard::RIGHT_ARROW))
-            Player->transform.WorldRotate({ 0, rotSpeed, 0 });
+            Sushi->transform.WorldRotate({ 0, rotSpeed, 0 });
+
+        if (Inputs::IsKeyPressed(Keyboard::Z))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalForward() * gt.DeltaTime());
+        if (Inputs::IsKeyPressed(Keyboard::S))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalBackward() * gt.DeltaTime());
+
+        if (Inputs::IsKeyPressed(Keyboard::Q))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalLeft() * gt.DeltaTime());
+        if (Inputs::IsKeyPressed(Keyboard::D))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalRight() * gt.DeltaTime());
 
     }
 
@@ -273,6 +263,7 @@ void GameManager::Update(const GameTimer& gt)
     if (Inputs::IsKeyDown(Keyboard::F1)) ECS_ENGINE->DrawSolidShader();
     if (Inputs::IsKeyDown(Keyboard::F2)) ECS_ENGINE->DrawWireframeShader();
     if (Inputs::IsKeyDown(Keyboard::F5)) ECS_ENGINE->DrawPostProcessShader(); 
+
     // Changement de caméra
     if (Inputs::IsKeyDown(Keyboard::M)) {
         if (switchCamera)
@@ -307,7 +298,30 @@ void GameManager::Update(const GameTimer& gt)
             cam2->m_viewY = 0.73f;
             cam2->m_renderOrder = 1;
         }
+
+      
         switchCamera = !switchCamera;
     }
+    if (Inputs::IsMousePressed(Mouse::LEFT))
+    {
+        DirectX::XMFLOAT2 mouseDelta = Inputs::GetMouseDelta();
+        float dx = XMConvertToRadians(0.25f * mouseDelta.x);
+        float dy = XMConvertToRadians(0.25f * mouseDelta.y);
 
+        theta += dx;
+        phi += dy;
+
+        if (phi < 0.1f) phi = 0.1f;
+        if (phi > XM_PI - 0.1f) phi = XM_PI - 0.1f;
+    }
+
+    if (Inputs::IsMousePressed(Mouse::RIGHT))
+    {
+        DirectX::XMFLOAT2 mouseDelta = Inputs::GetMouseDelta();
+        float dx = XMConvertToRadians(0.25f * mouseDelta.x);
+        float dy = XMConvertToRadians(0.25f * mouseDelta.y);
+
+        radius += dx - dy;
+        if (radius < 1.0f) radius = 1.0f;
+    }
 }

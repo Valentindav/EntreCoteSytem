@@ -37,7 +37,8 @@ private:
     bool switchCamera = true;
 
     int PlayerId = -1;
-    Entity* Player = nullptr;
+    Entity* four = nullptr;
+    Entity* Sol = nullptr;
 
 	Entity* Sushi = nullptr;
 
