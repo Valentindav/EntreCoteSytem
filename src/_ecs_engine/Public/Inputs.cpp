@@ -306,21 +306,29 @@ bool Inputs::IsCursorVisible()
 
 void Inputs::UpdateDeltas()
 {
-    s_mouseDelta.x = s_mousePosition.x - s_mousePositionPrevious.x;
-    s_mouseDelta.y = s_mousePosition.y - s_mousePositionPrevious.y;
-    s_mousePositionPrevious = s_mousePosition;
-
     if (s_mouseLocked && s_windowHandle != nullptr)
     {
+        // Calcule le delta DEPUIS le centre
+        s_mouseDelta.x = s_mousePosition.x - s_lockPosition.x;
+        s_mouseDelta.y = s_mousePosition.y - s_lockPosition.y;
+
+        // Recentre le curseur
         POINT centerScreen = s_lockPosition;
         ClientToScreen(s_windowHandle, &centerScreen);
         SetCursorPos(centerScreen.x, centerScreen.y);
 
+        // Force la position courante = centre pour la prochaine frame
         s_mousePosition.x = static_cast<float>(s_lockPosition.x);
         s_mousePosition.y = static_cast<float>(s_lockPosition.y);
+        s_mousePositionPrevious = s_mousePosition;
+    }
+    else
+    {
+        s_mouseDelta.x = s_mousePosition.x - s_mousePositionPrevious.x;
+        s_mouseDelta.y = s_mousePosition.y - s_mousePositionPrevious.y;
+        s_mousePositionPrevious = s_mousePosition;
     }
 }
-
 void Inputs::Update()
 {
     s_mouseDelta.x = s_mousePosition.x - s_mousePositionPrevious.x;

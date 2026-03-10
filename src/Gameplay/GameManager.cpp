@@ -63,7 +63,7 @@ void GameManager::InitEntities()
 
     four->SetType(Entity::TYPE::Player);
     four->transform.SetWorldScale({ 1.f, 1.f, 1.f });
-    four->transform.SetWorldPosition({0, 1, 0});
+    four->transform.SetWorldPosition({0, 0.45, 0});
     MaterialComponent* mat1 = ecs->AddComponents<MaterialComponent>(four);
     mat1->LoadTexture("../../res/KitchenMachinery_B_basecolor.png");
 
@@ -105,7 +105,7 @@ void GameManager::InitEntities()
     rb2->m_motionType = MotionType::Static;
 
     ColliderComponent* collider3 = ecs->AddComponents<ColliderComponent>(Sushi);
-    collider2->SetAsBox({ 1.f, 3.f, 1.f });
+    collider3->SetAsBox({ 1.f,1.25f, 1.f });
 
     MaterialComponent* matSushi = ecs->AddComponents<MaterialComponent>(Sushi);
     matSushi->LoadTexture("../../res/Sushi.png");
@@ -150,24 +150,22 @@ void GameManager::InitEntities()
 
 void GameManager::InitCameras()
 {
-    // --- Camera 1 ---
     Entity* cam1 = ECS_ECS->GetComponents<CameraComponent>()[0]->GetOwner();
-    Sushi->AddChild(cam1);
 
-    XMFLOAT3 playerPos = Sushi->transform.GetWorldPosition();
-    cam1->transform.SetWorldPosition(playerPos);
-    cam1->transform.SetLocalPosition({ 0, 4.0f, -7.f });
-    cam1->transform.LookAt({ playerPos.x, playerPos.y + 1, playerPos.z });
-    
-    // --- Camera 2 ---
+    Sushi->AddChild(cam1);
+    cam1->transform.SetLocalPosition({ 0.f, 3.5f, -1.5f }); // hauteur des yeux
+    cam1->transform.SetLocalRotation({ 0.f, 0.f, 0.f });   // regard droit devant
+
     Entity* cam2 = Camera::Camera(0.73f, 0.73f, 0.25f, 0.25f, 1);
     cam2->transform.SetWorldPosition({ 0.0f, 5.0f, -10.0f });
     cam2->transform.LookAt(Sushi->transform.GetWorldPosition());
 
     cameras.push_back(cam1);
     cameras.push_back(cam2);
-}
+    cam1->AddChild(cam2);
 
+	Sushi->AddChild(cam1);
+}
 void GameManager::InitLights()
 {
     // --- image 1 ---
@@ -188,23 +186,62 @@ void GameManager::InitUis()
 
 void GameManager::Update(const GameTimer& gt)
 {
-   
-    float x = radius * sinf(phi) * cosf(theta);
-    float z = radius * sinf(phi) * sinf(theta);
-    float y = radius * cosf(phi);
 
-    cameras[0]->transform.SetWorldPosition({ x, y, z });
+    Inputs::LockMouse(true);
 
-    if (Sushi) {
-        cameras[0]->transform.LookAt(Sushi->transform.GetWorldPosition());
+    float dt = gt.DeltaTime();
+    m_timerFps += dt;
+    if (m_timerFps >= 1.f)
+    {
+        m_timerFps = 0.0f;
+        std::string text = "fps : " + std::to_string((int)(1.0f / dt));
+        UiTextComponent* textComp = textFps->GetComponent<UiTextComponent>();
+        if (textComp) {
+            textComp->m_text = text;
+        }
     }
-  
+
+    if (Sushi)
+    {
+        float rotSpeed = m_speed * dt;
+
+        // Lecture souris en permanence
+        DirectX::XMFLOAT2 mouseDelta = Inputs::GetMouseDelta();
+        float dx = XMConvertToRadians(0.10f * mouseDelta.x); // réduis si trop rapide
+        float dy = XMConvertToRadians(0.10f * mouseDelta.y);
+
+        // Souris X ? tourne Sushi (yaw) ? la cam suit automatiquement car enfant
+        Sushi->transform.WorldRotate({ 0.f, dx, 0.f });
+
+        // Souris Y ? pitch local de la caméra uniquement
+        phi += dy;
+        if (phi < -XM_PIDIV2 + 0.1f) phi = -XM_PIDIV2 + 0.1f;
+        if (phi > XM_PIDIV2 - 0.1f)  phi = XM_PIDIV2 - 0.1f;
+        cameras[0]->transform.SetLocalRotation({ phi, 0.f, 0.f });
+
+        // Touches fléchées
+        if (Inputs::IsKeyPressed(Keyboard::LEFT_ARROW))
+            Sushi->transform.WorldRotate({ 0, -rotSpeed, 0 });
+        if (Inputs::IsKeyPressed(Keyboard::RIGHT_ARROW))
+            Sushi->transform.WorldRotate({ 0, rotSpeed, 0 });
+
+        // Déplacement
+        if (Inputs::IsKeyPressed(Keyboard::Z))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalForward() * dt);
+        if (Inputs::IsKeyPressed(Keyboard::S))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalBackward() * dt);
+        if (Inputs::IsKeyPressed(Keyboard::Q))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalLeft() * dt);
+        if (Inputs::IsKeyPressed(Keyboard::D))
+            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalRight() * dt);
+    }
+
+    // Mort / replay
     if (!Sushi && !m_playerDead || Inputs::IsKeyDown(Keyboard::R))
     {
         m_playerDead = true;
         m_replay.StopRecording();
         m_replay.StartReplay();
-
 
         if (cameras[1])
         {
@@ -217,52 +254,10 @@ void GameManager::Update(const GameTimer& gt)
         }
     }
 
- 
-    if (Inputs::IsKeyDown(Keyboard::T))
-    {
-        ECS_APP->GetTimer().ToggleSlowTimeDown();
-    }
-
-    float dt = gt.DeltaTime();
-
-    m_timerFps += dt;
-    if (m_timerFps >= 1.f)
-    {
-        m_timerFps = 0.0f;
-        std::string text = "fps : " + std::to_string((int)(1.0f / dt));
-
-        UiTextComponent* textComp = textFps->GetComponent<UiTextComponent>();
-        if (textComp) {
-            textComp->m_text = text;
-        }
-    }
-    if (Sushi)
-    {
-        float rotSpeed = m_speed * dt;
-        XMFLOAT3 deltaMove = { 0,0,0 };
- 
-        // Rotation Cube
-        if (Inputs::IsKeyPressed(Keyboard::LEFT_ARROW))
-            Sushi->transform.WorldRotate({ 0, -rotSpeed, 0 });
-        if (Inputs::IsKeyPressed(Keyboard::RIGHT_ARROW))
-            Sushi->transform.WorldRotate({ 0, rotSpeed, 0 });
-
-        if (Inputs::IsKeyPressed(Keyboard::Z))
-            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalForward() * gt.DeltaTime());
-        if (Inputs::IsKeyPressed(Keyboard::S))
-            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalBackward() * gt.DeltaTime());
-
-        if (Inputs::IsKeyPressed(Keyboard::Q))
-            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalLeft() * gt.DeltaTime());
-        if (Inputs::IsKeyPressed(Keyboard::D))
-            Sushi->transform.WorldTranslate(Sushi->transform.GetLocalRight() * gt.DeltaTime());
-
-    }
-
     // Shaders de debug
     if (Inputs::IsKeyDown(Keyboard::F1)) ECS_ENGINE->DrawSolidShader();
     if (Inputs::IsKeyDown(Keyboard::F2)) ECS_ENGINE->DrawWireframeShader();
-    if (Inputs::IsKeyDown(Keyboard::F5)) ECS_ENGINE->DrawPostProcessShader(); 
+    if (Inputs::IsKeyDown(Keyboard::F5)) ECS_ENGINE->DrawPostProcessShader();
 
     // Changement de caméra
     if (Inputs::IsKeyDown(Keyboard::M)) {
@@ -298,30 +293,10 @@ void GameManager::Update(const GameTimer& gt)
             cam2->m_viewY = 0.73f;
             cam2->m_renderOrder = 1;
         }
-
-      
         switchCamera = !switchCamera;
     }
-    if (Inputs::IsMousePressed(Mouse::LEFT))
-    {
-        DirectX::XMFLOAT2 mouseDelta = Inputs::GetMouseDelta();
-        float dx = XMConvertToRadians(0.25f * mouseDelta.x);
-        float dy = XMConvertToRadians(0.25f * mouseDelta.y);
 
-        theta += dx;
-        phi += dy;
-
-        if (phi < 0.1f) phi = 0.1f;
-        if (phi > XM_PI - 0.1f) phi = XM_PI - 0.1f;
-    }
-
-    if (Inputs::IsMousePressed(Mouse::RIGHT))
-    {
-        DirectX::XMFLOAT2 mouseDelta = Inputs::GetMouseDelta();
-        float dx = XMConvertToRadians(0.25f * mouseDelta.x);
-        float dy = XMConvertToRadians(0.25f * mouseDelta.y);
-
-        radius += dx - dy;
-        if (radius < 1.0f) radius = 1.0f;
-    }
+    // Slow motion
+    if (Inputs::IsKeyDown(Keyboard::T))
+        ECS_APP->GetTimer().ToggleSlowTimeDown();
 }

@@ -22,9 +22,10 @@ private:
 
     ECS* ecs = nullptr;
 
-    float theta = 1.5f * DirectX::XM_PI;
-    float phi = DirectX::XM_PIDIV4;
+    float phi = 0.0f;   
+    float theta = 0.0f;
     float radius = 5.0f;
+
     float m_speed = 5.0f;
     float m_jumpforce = 500.0f;
     float m_timerFps = 0.0f;

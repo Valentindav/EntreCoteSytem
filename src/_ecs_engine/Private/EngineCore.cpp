@@ -46,7 +46,7 @@ void EngineCore::Init(HINSTANCE hInstance, int width, int height, bool fullscree
     m_clientHeight = height;
 
     m_window->OnResize = [this](int w, int h) { this->OnResize(); };
-
+    Inputs::Initialize(m_window->GetHwnd());
     m_renderer = std::make_unique<Renderer>();
     m_renderer->Initialize(m_window->GetHwnd(), m_window->GetClientWidth(), m_window->GetClientHeight());
 
