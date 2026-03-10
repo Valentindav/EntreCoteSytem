@@ -5,7 +5,7 @@
 #include "RailScript.h"
 #include "SushiArmScript.h"
 #include <ECS_Engine.h>
-
+#include "PnjScript.h"
 GameManager* GameManager::m_instance = nullptr;
 
 GameManager* GameManager::Getinstance() {
@@ -68,10 +68,28 @@ void GameManager::InitEntities()
     mat1->LoadTexture("../../res/KitchenMachinery_B_basecolor.png");
 
     RigidBodyComponent* rb1 = ecs->AddComponents<RigidBodyComponent>(four);
-    rb1->m_motionType = MotionType::Kinematic;
+    rb1->m_motionType = MotionType::Static;
 
     ColliderComponent* collider1 = ecs->AddComponents<ColliderComponent>(four);
     collider1->SetAsBox({ 0.5f, 0.5f, 0.5f });
+
+
+    CommandeCollector = ECS_ECS->CreateEntity();
+
+    MeshComponent* meshCommandeCollector = ecs->AddComponents<MeshComponent>(CommandeCollector);
+    meshCommandeCollector->LoadMesh("../../res/commandeCollector.obj");
+
+   CommandeCollector->SetType(Entity::TYPE::Player);
+   CommandeCollector->transform.SetWorldScale({ 1.f, 1.f, 1.f });
+   CommandeCollector->transform.SetWorldPosition({ 0, 0.45, 5 });
+   MaterialComponent* matCommandeCollector = ecs->AddComponents<MaterialComponent>(CommandeCollector);
+    matCommandeCollector->LoadTexture("../../res/KitchenMachinery_B_basecolor.png");
+
+    RigidBodyComponent* rbCommandeCollector = ecs->AddComponents<RigidBodyComponent>(CommandeCollector);
+    rbCommandeCollector->m_motionType = MotionType::Static;
+
+    ColliderComponent* colliderCommandeCollector = ecs->AddComponents<ColliderComponent>(CommandeCollector);
+    colliderCommandeCollector->SetAsBox({ 0.5f, 0.5f, 0.5f });
 
 
     Sol = ECS_ECS->CreateEntity();
@@ -91,8 +109,30 @@ void GameManager::InitEntities()
     ColliderComponent* collider2 = ecs->AddComponents<ColliderComponent>(Sol);
     collider2->SetAsBox({ 10.f, 0.02f, 10.f });
 
+	Customer1 = ECS_ECS->CreateEntity();
+    ScriptComponent* scriptCustomer1 = ecs->AddComponents<ScriptComponent>(Customer1);
+    scriptCustomer1->SetScript<PnjScript>();
 
 
+    MeshComponent* mesh1Custom= ecs->AddComponents<MeshComponent>(Customer1);
+    mesh1Custom->LoadMesh("../../res/Customer.m3d");
+
+    AnimatorComponent* animatorCustomer1 = ECS_ECS->AddComponents<AnimatorComponent>(Customer1);
+    animatorCustomer1->LoadSkeleton("../../res/Customer.m3d");
+    animatorCustomer1->Play("Armature|mixamo.com|Layer0.002", true, 1.0f);
+
+
+    RigidBodyComponent* rbCustomer1 = ecs->AddComponents<RigidBodyComponent>(Customer1);
+    rbCustomer1->m_motionType = MotionType::Static;
+
+    ColliderComponent* colliderCustomer1 = ecs->AddComponents<ColliderComponent>(Customer1);
+    colliderCustomer1->SetAsBox({ 1, 3, 1 });
+
+    Customer1->transform.SetWorldScale({ 1.f, 1.f, 1.f });
+    Customer1->transform.SetWorldPosition({ 0, -0.5, 10 });
+    Customer1->transform.WorldRotate({ 0, 3.14, 0});
+    MaterialComponent* matCustom = ecs->AddComponents<MaterialComponent>(Customer1);
+    matCustom->LoadTexture("../../res/wojaknpc_dif_txt.png");
 
 	//------Sushi------
     Sushi = ECS_ECS->CreateEntity();
@@ -151,7 +191,6 @@ void GameManager::InitEntities()
 void GameManager::InitCameras()
 {
     Entity* cam1 = ECS_ECS->GetComponents<CameraComponent>()[0]->GetOwner();
-
     Sushi->AddChild(cam1);
     cam1->transform.SetLocalPosition({ 0.f, 3.5f, -1.5f }); // hauteur des yeux
     cam1->transform.SetLocalRotation({ 0.f, 0.f, 0.f });   // regard droit devant
@@ -186,9 +225,9 @@ void GameManager::InitUis()
 
 void GameManager::Update(const GameTimer& gt)
 {
+    Customer1->transform.WorldTranslate(Customer1->transform.GetWorldForward() * gt.DeltaTime());
 
     Inputs::LockMouse(true);
-
     float dt = gt.DeltaTime();
     m_timerFps += dt;
     if (m_timerFps >= 1.f)

@@ -39,7 +39,12 @@ private:
 
     int PlayerId = -1;
     Entity* four = nullptr;
+    Entity* CommandeCollector = nullptr;
+
     Entity* Sol = nullptr;
+
+    Entity* Customer1 = nullptr;
+
 
 	Entity* Sushi = nullptr;
 
