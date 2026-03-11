@@ -31,6 +31,21 @@ public:
 
     void OnCollisionEnter(Entity* other)
     {
+        if (other->GetName() == "Sushi")
+        {
+            if (Inputs::IsMouseDown(Mouse::Button::LEFT))
+            {
+				other->AddChild(owner);
+                owner->GetComponent<RigidBodyComponent>()->m_motionType = MotionType::Static;
+				
+
+            }else if (Inputs::IsMouseUp(Mouse::Button::LEFT)) {
+                other->RemoveChild(owner);
+                owner->GetComponent<RigidBodyComponent>()->m_motionType = MotionType::Dynamic;
+
+            }
+        }
+
         if (ECS_ECS->GetComponent<ScriptComponent>(other->GetId()) && dynamic_cast<PlatScript*>(ECS_ECS->GetComponent<ScriptComponent>(other->GetId())->m_instance))
         {
 

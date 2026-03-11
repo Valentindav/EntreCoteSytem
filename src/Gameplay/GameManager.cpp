@@ -103,7 +103,7 @@ void GameManager::InitEntities()
     mesh2->LoadMesh("cube");
 
     
-    Sol->transform.SetWorldScale({ 10.f, 0.02f, 10.f });
+    Sol->transform.SetWorldScale({ 10.f, 0.5f, 10.f });
 
     MaterialComponent* mat2 = ecs->AddComponents<MaterialComponent>(Sol);
     mat2->LoadTexture("../../res/Sol.png");
@@ -112,7 +112,7 @@ void GameManager::InitEntities()
     rb2->m_motionType = MotionType::Static;
 
     ColliderComponent* collider2 = ecs->AddComponents<ColliderComponent>(Sol);
-    collider2->SetAsBox({ 10.f, 0.02f, 10.f });
+    collider2->SetAsBox({ 10.f, 0.5f, 10.f });
 
 	Customer1 = ECS_ECS->CreateEntity();
     ScriptComponent* scriptCustomer1 = ecs->AddComponents<ScriptComponent>(Customer1);
@@ -144,7 +144,7 @@ void GameManager::InitEntities()
     PlayerId = Sushi->GetId();
     MeshComponent* meshSushi = ecs->AddComponents<MeshComponent>(Sushi);
     meshSushi->LoadMesh("../../res/sushiBody.obj");
-
+    Sushi->SetName("Sushi");
 
     RigidBodyComponent* rb3 = ecs->AddComponents<RigidBodyComponent>(Sushi);
     rb2->m_motionType = MotionType::Static;
@@ -355,7 +355,7 @@ void GameManager::Update(const GameTimer& gt)
         mBun->LoadMesh("sphere");
 
         MaterialComponent* matBun = ECS_ECS->AddComponents<MaterialComponent>(bun);
-        matBun->SetColor({ 0.85f, 0.55f, 0.1f, 1.f }); // marron = bun
+        matBun->SetColor({ 0.85f, 0.55f, 0.1f, 0.2}); // marron = bun
 
         RigidBodyComponent* rbBun = ECS_ECS->AddComponents<RigidBodyComponent>(bun);
         rbBun->m_motionType = MotionType::Dynamic;
