@@ -1,7 +1,7 @@
 #pragma once
 #include "Public/ECS_Components/TransformComponent.h"
 #include <vector>
-
+#include <string>
 class ECS;
 
 class Entity
@@ -11,7 +11,7 @@ class Entity
 
 	Entity* parent = nullptr;
 	std::vector<Entity*> children;
-
+	std::string name;
 public:
 	enum TYPE {
 		Bullet,
@@ -22,6 +22,9 @@ public:
 
 		Count
 	};
+
+	void SetName(const std::string& newName) { name = newName; }
+	std::string GetName()  { return name; }
 
 	TYPE type = TYPE::Other;
 	TransformComponent transform;

@@ -6,6 +6,10 @@
 #include "SushiArmScript.h"
 #include <ECS_Engine.h>
 #include "PnjScript.h"
+
+#include "CommandeScript.h"
+#include "PlatScript.h"
+#include "IngredientScript.h"
 GameManager* GameManager::m_instance = nullptr;
 
 GameManager* GameManager::Getinstance() {
@@ -91,6 +95,7 @@ void GameManager::InitEntities()
     ColliderComponent* colliderCommandeCollector = ecs->AddComponents<ColliderComponent>(CommandeCollector);
     colliderCommandeCollector->SetAsBox({ 0.5f, 0.5f, 0.5f });
 
+	CommandeCollector->SetName("CommandeCollector");
 
     Sol = ECS_ECS->CreateEntity();
 
@@ -143,6 +148,7 @@ void GameManager::InitEntities()
 
     RigidBodyComponent* rb3 = ecs->AddComponents<RigidBodyComponent>(Sushi);
     rb2->m_motionType = MotionType::Static;
+
 
     ColliderComponent* collider3 = ecs->AddComponents<ColliderComponent>(Sushi);
     collider3->SetAsBox({ 1.f,1.25f, 1.f });
@@ -225,7 +231,6 @@ void GameManager::InitUis()
 
 void GameManager::Update(const GameTimer& gt)
 {
-    Customer1->transform.WorldTranslate(Customer1->transform.GetWorldForward() * gt.DeltaTime());
 
     Inputs::LockMouse(true);
     float dt = gt.DeltaTime();
@@ -298,6 +303,135 @@ void GameManager::Update(const GameTimer& gt)
     if (Inputs::IsKeyDown(Keyboard::F2)) ECS_ENGINE->DrawWireframeShader();
     if (Inputs::IsKeyDown(Keyboard::F5)) ECS_ENGINE->DrawPostProcessShader();
 
+    if (Inputs::IsKeyDown(Keyboard::SPACE))
+    {
+		Sushi->transform.WorldTranslate({ 0.f, 5, 0.f });
+
+    }
+
+
+
+    // --- Spawn Plat (P) ---
+    if (Inputs::IsKeyDown(Keyboard::P))
+    {
+        XMFLOAT3 spawnPos = Sushi->transform.GetWorldPosition();
+        spawnPos.z += 1.5f; // spawn devant le joueur
+
+        Entity* plat = ECS_ECS->CreateEntity();
+        plat->transform.SetWorldPosition(spawnPos);
+        plat->transform.SetWorldScale({ 0.5f, 0.1f, 0.5f });
+        plat->SetName("Plat");
+
+        MeshComponent* mPlat = ECS_ECS->AddComponents<MeshComponent>(plat);
+        mPlat->LoadMesh("cube");
+
+        MaterialComponent* matPlat = ECS_ECS->AddComponents<MaterialComponent>(plat);
+        matPlat->SetColor({ 0.9f, 0.9f, 0.9f, 1.f }); // blanc = plat vide
+
+        RigidBodyComponent* rbPlat = ECS_ECS->AddComponents<RigidBodyComponent>(plat);
+        rbPlat->m_motionType = MotionType::Static;
+        rbPlat->m_useGravity = true;
+
+        ColliderComponent* colPlat = ECS_ECS->AddComponents<ColliderComponent>(plat);
+        colPlat->SetAsBox({ 0.5f, 0.1f, 0.5f });
+
+        ScriptComponent* scPlat = ECS_ECS->AddComponents<ScriptComponent>(plat);
+        scPlat->SetScript<PlatScript>();
+
+        std::cout << "[Spawn] Plat créé." << std::endl;
+    }
+
+    // --- Spawn Bun (1) ---
+    if (Inputs::IsKeyDown(Keyboard::NUMPAD1))
+    {
+        XMFLOAT3 spawnPos = Sushi->transform.GetWorldPosition();
+        spawnPos.y += 1.f;
+
+        Entity* bun = ECS_ECS->CreateEntity();
+        bun->transform.SetWorldPosition(spawnPos);
+        bun->transform.SetWorldScale({ 0.3f, 0.3f, 0.3f });
+
+        MeshComponent* mBun = ECS_ECS->AddComponents<MeshComponent>(bun);
+        mBun->LoadMesh("sphere");
+
+        MaterialComponent* matBun = ECS_ECS->AddComponents<MaterialComponent>(bun);
+        matBun->SetColor({ 0.85f, 0.55f, 0.1f, 1.f }); // marron = bun
+
+        RigidBodyComponent* rbBun = ECS_ECS->AddComponents<RigidBodyComponent>(bun);
+        rbBun->m_motionType = MotionType::Dynamic;
+        rbBun->m_useGravity = true;
+
+        ColliderComponent* colBun = ECS_ECS->AddComponents<ColliderComponent>(bun);
+        colBun->SetAsBox({ 0.3f, 0.15f, 0.3f });
+
+        ScriptComponent* scBun = ECS_ECS->AddComponents<ScriptComponent>(bun);
+        scBun->SetScript<IngredientScript>();
+        IngredientScript* ingBun = static_cast<IngredientScript*>(scBun->m_instance);
+        ingBun->isBuns = true;
+
+        std::cout << "[Spawn] Bun créé." << std::endl;
+    }
+
+    // --- Spawn Salad (2) ---
+    if (Inputs::IsKeyDown(Keyboard::NUMPAD2))
+    {
+        XMFLOAT3 spawnPos = Sushi->transform.GetWorldPosition();
+        spawnPos.y += 1.f;
+
+        Entity* salad = ECS_ECS->CreateEntity();
+        salad->transform.SetWorldPosition(spawnPos);
+        salad->transform.SetWorldScale({ 0.3f, 0.15f, 0.3f });
+
+        MeshComponent* mSalad = ECS_ECS->AddComponents<MeshComponent>(salad);
+        mSalad->LoadMesh("cube");
+
+        MaterialComponent* matSalad = ECS_ECS->AddComponents<MaterialComponent>(salad);
+        matSalad->SetColor({ 0.2f, 0.75f, 0.2f, 1.f }); // vert = salade
+
+        RigidBodyComponent* rbSalad = ECS_ECS->AddComponents<RigidBodyComponent>(salad);
+        rbSalad->m_motionType = MotionType::Dynamic;
+        rbSalad->m_useGravity = true;
+
+        ColliderComponent* colSalad = ECS_ECS->AddComponents<ColliderComponent>(salad);
+        colSalad->SetAsBox({ 0.3f, 0.15f, 0.3f });
+
+        ScriptComponent* scSalad = ECS_ECS->AddComponents<ScriptComponent>(salad);
+        scSalad->SetScript<IngredientScript>();
+        IngredientScript* ingSalad = static_cast<IngredientScript*>(scSalad->m_instance);
+        ingSalad->isSalad = true;
+
+        std::cout << "[Spawn] Salad créée." << std::endl;
+    }
+
+    // --- Spawn Fish (3) ---
+    if (Inputs::IsKeyDown(Keyboard::NUMPAD3))
+    {
+        XMFLOAT3 spawnPos = Sushi->transform.GetWorldPosition();
+        spawnPos.y += 1.f;
+
+        Entity* fish = ECS_ECS->CreateEntity();
+        fish->transform.SetWorldPosition(spawnPos);
+        fish->transform.SetWorldScale({ 0.4f, 0.15f, 0.2f });
+
+        MeshComponent* mFish = ECS_ECS->AddComponents<MeshComponent>(fish);
+        mFish->LoadMesh("cube");
+
+        MaterialComponent* matFish = ECS_ECS->AddComponents<MaterialComponent>(fish);
+        matFish->SetColor({ 1.f, 0.3f, 0.3f, 1.f }); // rouge = fish
+
+        RigidBodyComponent* rbFish = ECS_ECS->AddComponents<RigidBodyComponent>(fish);
+        rbFish->m_motionType = MotionType::Dynamic;
+        rbFish->m_useGravity = true;
+        ColliderComponent* colFish = ECS_ECS->AddComponents<ColliderComponent>(fish);
+        colFish->SetAsBox({ 0.4f, 0.15f, 0.2f });
+
+        ScriptComponent* scFish = ECS_ECS->AddComponents<ScriptComponent>(fish);
+        scFish->SetScript<IngredientScript>();
+        IngredientScript* ingFish = static_cast<IngredientScript*>(scFish->m_instance);
+        ingFish->isFish = true;
+
+        std::cout << "[Spawn] Fish créé." << std::endl;
+    }
     // Changement de caméra
     if (Inputs::IsKeyDown(Keyboard::M)) {
         if (switchCamera)
