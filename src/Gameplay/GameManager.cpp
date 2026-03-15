@@ -5,6 +5,7 @@
 #include "RailScript.h"
 #include "SushiArmScript.h"
 #include <ECS_Engine.h>
+#include "Audio/Audio.h"
 
 GameManager* GameManager::m_instance = nullptr;
 
@@ -27,6 +28,44 @@ void GameManager::Init() {
     InitLights();
 
     InitUis();
+    // Musique de fond (2D, boucle dès Play() avec loop=true)
+    audio::LoadSound("music_gameplay", L"../../res/Audio/song.mp3", 0, false);
+
+    // Effets sonores one-shot (2D)
+    audio::LoadSound("sfx_shoot", L"../../res/Audio/song.mp3", 4, false);
+    audio::LoadSound("sfx_explosion", L"../../res/Audio/song.mp3", 2, false);
+    audio::LoadSound("sfx_player_hit", L"../../res/Audio/song.mp3", 1, false);
+
+    // Ambiance spatiale (3D — orbite autour du joueur)
+    audio::LoadSound("sfx_sushi_whoosh", L"../../res/Audio/song.mp3", 0, true);
+
+    // -------------------------------------------------------------------------
+    //  Catégories de volume
+    // -------------------------------------------------------------------------
+    audio::SetVolumeOfCategory(audio::Category::MUSIC, 80);
+    audio::SetVolumeOfCategory(audio::Category::SFX, 100);
+    audio::SetVolumeOfCategory(audio::Category::AMBIENT, 70);
+
+    audio::SetAudioCategory("music_gameplay", audio::Category::MUSIC);
+    audio::SetAudioCategory("sfx_shoot", audio::Category::SFX);
+    audio::SetAudioCategory("sfx_explosion", audio::Category::SFX);
+    audio::SetAudioCategory("sfx_player_hit", audio::Category::SFX);
+    audio::SetAudioCategory("sfx_sushi_whoosh", audio::Category::AMBIENT);
+
+    // -------------------------------------------------------------------------
+    //  Lancement de la musique de fond en boucle
+    // -------------------------------------------------------------------------
+    audio::Play("music_gameplay", true);
+
+    // -------------------------------------------------------------------------
+    //  Son 3D attaché au Sushi — la position du joueur sert de listener.
+    //  Le son orbite automatiquement autour du listener (voir SoundSource3D).
+    // -------------------------------------------------------------------------
+    XMFLOAT3 playerPos = Player->transform.GetWorldPosition();
+    audio::Play("sfx_sushi_whoosh", /*loop=*/false,
+        audio::Vector3f32(playerPos.x, playerPos.y, playerPos.z));
+
+    m_replay.StartRecording(PlayerId);
 
     m_replay.StartRecording(PlayerId);
 }
@@ -188,6 +227,7 @@ void GameManager::Update(const GameTimer& gt)
         Player = nullptr;
     }
 
+
     if (!Player && !m_playerDead || Inputs::IsKeyDown(Keyboard::R))
     {
         m_playerDead = true;
@@ -244,6 +284,7 @@ void GameManager::Update(const GameTimer& gt)
     }
 
     float dt = gt.DeltaTime();
+    audio::Update(dt);
 
     m_timerFps += dt;
     if (m_timerFps >= 1.f)
