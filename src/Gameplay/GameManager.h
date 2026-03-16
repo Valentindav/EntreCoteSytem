@@ -57,5 +57,5 @@ private:
     void InitCameras();
     void InitLights();
     void InitUis();
-
+    void InitAudio();
 };

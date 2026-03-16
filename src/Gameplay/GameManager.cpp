@@ -28,33 +28,8 @@ void GameManager::Init() {
     InitLights();
 
     InitUis();
-    audio::LoadSound("music_gameplay", L"../../res/Audio/song.mp3", 0, false);
 
-    audio::LoadSound("sfx_shoot", L"../../res/Audio/song.mp3", 4, false);
-    audio::LoadSound("sfx_explosion", L"../../res/Audio/song.mp3", 2, false);
-    audio::LoadSound("sfx_player_hit", L"../../res/Audio/song.mp3", 1, false);
-
-    audio::LoadSound("sfx_sushi_whoosh", L"../../res/Audio/song.mp3", 0, true);
-
-
-    audio::SetVolumeOfCategory(audio::Category::MUSIC, 80);
-    audio::SetVolumeOfCategory(audio::Category::SFX, 100);
-    audio::SetVolumeOfCategory(audio::Category::AMBIENT, 70);
-
-    audio::SetAudioCategory("music_gameplay", audio::Category::MUSIC);
-    audio::SetAudioCategory("sfx_shoot", audio::Category::SFX);
-    audio::SetAudioCategory("sfx_explosion", audio::Category::SFX);
-    audio::SetAudioCategory("sfx_player_hit", audio::Category::SFX);
-    audio::SetAudioCategory("sfx_sushi_whoosh", audio::Category::AMBIENT);
-
-    audio::Play("music_gameplay", true);
-
-
-    XMFLOAT3 playerPos = Player->transform.GetWorldPosition();
-    audio::Play("sfx_sushi_whoosh", false,
-        audio::Vector3f32(playerPos.x, playerPos.y, playerPos.z));
-
-    m_replay.StartRecording(PlayerId);
+    InitAudio();
 
     m_replay.StartRecording(PlayerId);
 }
@@ -203,6 +178,17 @@ void GameManager::InitUis()
 
     // --- text 1 (FPS) ---
     textFps = Ui::Text(0.02f, 0.02f, "fps : ");
+}
+
+void GameManager::InitAudio()
+{
+    audio::LoadSound("music_gameplay", L"../../res/Audio/song.mp3", 0, false);
+
+    audio::SetVolumeOfCategory(audio::Category::MUSIC, 80);
+
+    audio::SetAudioCategory("music_gameplay", audio::Category::MUSIC);
+
+    audio::Play("music_gameplay", true);
 }
 
 #pragma endregion
