@@ -8,13 +8,13 @@
 class Window
 {
 public:
-    Window(HINSTANCE hInstance, int width, int height, const std::wstring& caption);
+    Window() = default;
     ~Window();
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
 
-    bool Initialize();
+    bool Initialize(HINSTANCE hInstance, int width, int height, const std::wstring& caption);
 
     bool ProcessMessages();
 

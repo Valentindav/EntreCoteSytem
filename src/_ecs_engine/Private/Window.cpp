@@ -5,24 +5,22 @@
 
 Window* Window::sInstance = nullptr;
 
-Window::Window(HINSTANCE hInstance, int width, int height, const std::wstring& caption)
-    : mhAppInst(hInstance)
-    , mClientWidth(width)
-    , mClientHeight(height)
-    , mMainWndCaption(caption)
-    , mhMainWnd(nullptr)
-{
-    assert(sInstance == nullptr && "Une seule Window autorisée pour le moment");
-    sInstance = this;
-}
-
 Window::~Window()
 {
     sInstance = nullptr;
 }
 
-bool Window::Initialize()
+bool Window::Initialize(HINSTANCE hInstance, int width, int height, const std::wstring& caption)
 {
+    mhAppInst = hInstance;
+    mClientWidth = width;
+    mClientHeight = height;
+    mMainWndCaption = caption;
+    mhMainWnd = nullptr;
+
+    assert(sInstance == nullptr && "Une seule Window autorisée pour le moment");
+    sInstance = this;
+
     return InitMainWindow();
 }
 

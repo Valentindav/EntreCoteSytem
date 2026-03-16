@@ -78,13 +78,13 @@ public:
 template<typename T>
 inline T* Entity::GetComponent()
 {
-	return ECS_ENGINE->GetECS()->GetComponent<T>(id);
+	return (EngineCore::GetInternalInstance())->GetECS()->GetComponent<T>(id);
 }
 
 template<typename T>
 inline std::vector<T*> Entity::GetComponents()
 {
-	return ECS_ENGINE->GetECS()->GetComponents<T>(id);
+	return (EngineCore::GetInternalInstance())->GetECS()->GetComponents<T>(id);
 }
 
 template<typename T>

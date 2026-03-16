@@ -1,24 +1,20 @@
 #pragma once
+
 #include "Public/Application.h"
+#include "Private/Managers.h"
+#include "Private/Window.h"
+
+#include "../Public/ECS.h"
+
 #include <Renderer.h>
 #include <memory>
 #include <Windows.h>
 #include <atomic>
 #include <mutex>
 
-class ECS;
-class Window;
-class ResourceManager;
-class BatchManager;
-class CameraManager;
-class LightManager;
-class UiManager;
-class AnimationManager;
-class ParticleManager;
-class MenuManager;
-class Entity;
-
 #define ECS_ENGINE (EngineCore::GetInternalInstance())
+
+class Entity;
 
 class EngineCore : public Application
 {
@@ -34,18 +30,19 @@ public:
 
     void UpdateSplashScreen(const GameTimer& gt);
 
-    ECS* GetECS() const override { return m_ecs.get(); }
     GameTimer& GetTimer() override { return m_timer; }
 
-    std::unique_ptr<Renderer>& GetRenderer() { return m_renderer; }
-    ResourceManager* GetResourceManager() const { return m_resourceManager.get(); }
-    BatchManager* GetBatchManager() const { return m_batchManager.get(); }
-    CameraManager* GetCameraManager() const { return m_cameraManager.get(); }
-    LightManager* GetLightManager() const { return m_lightManager.get(); }
-    UiManager* GetUiManager() const { return m_uiManager.get(); }
-    AnimationManager* GetAnimationManager() const { return m_animationManager.get(); }
-    ParticleManager* GetParticleManager() const { return m_particleManager.get(); }
-    MenuManager* GetMenuManager() const { return m_menuManager.get(); }
+    ECS* GetECS() const override { return &m_ecs; }
+
+    Renderer* GetRenderer() const { return &m_renderer; }
+    ResourceManager* GetResourceManager() const { return &m_resourceManager; }
+    BatchManager* GetBatchManager() const { return &m_batchManager; }
+    CameraManager* GetCameraManager() const { return &m_cameraManager; }
+    LightManager* GetLightManager() const { return &m_lightManager; }
+    UiManager* GetUiManager() const { return &m_uiManager; }
+    AnimationManager* GetAnimationManager() const { return &m_animationManager; }
+    ParticleManager* GetParticleManager() const { return &m_particleManager; }
+    MenuManager* GetMenuManager() const { return &m_menuManager; }
 
     void DrawSolidShader(bool _enable);
     void DrawSolidShader();
@@ -59,18 +56,19 @@ public:
 
 private:
     GameTimer m_timer;
-    std::unique_ptr<Window> m_window = nullptr;
-    std::unique_ptr<ECS> m_ecs = nullptr;
 
-    std::unique_ptr<Renderer> m_renderer;
-    std::unique_ptr<ResourceManager> m_resourceManager;
-    std::unique_ptr<BatchManager> m_batchManager;
-    std::unique_ptr<CameraManager> m_cameraManager;
-    std::unique_ptr<LightManager> m_lightManager;
-    std::unique_ptr<UiManager> m_uiManager;
-    std::unique_ptr<AnimationManager> m_animationManager;
-    std::unique_ptr<ParticleManager> m_particleManager;
-    std::unique_ptr<MenuManager> m_menuManager;
+    mutable Window m_window;
+    mutable ECS m_ecs;
+
+    mutable Renderer m_renderer;
+    mutable ResourceManager m_resourceManager;
+    mutable BatchManager m_batchManager;
+    mutable CameraManager m_cameraManager;
+    mutable LightManager m_lightManager;
+    mutable UiManager m_uiManager;
+    mutable AnimationManager m_animationManager;
+    mutable ParticleManager m_particleManager;
+    mutable MenuManager m_menuManager;
 
     uint8_t m_filterShaders = 0;
 
