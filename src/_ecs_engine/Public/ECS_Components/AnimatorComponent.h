@@ -49,6 +49,7 @@ public:
     {
         PlaybackSpeed = 0;
         IsPlaying = false;
+        Loop = false;
         TimePos = 0;
         CurrentBoneOffset = 0;
     }

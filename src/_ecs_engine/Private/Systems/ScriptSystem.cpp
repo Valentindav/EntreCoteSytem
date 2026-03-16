@@ -1,9 +1,10 @@
 #include "ScriptSystem.h"
 #include <GameTimer.h>
 #include "Public/ECS_Components/ScriptComponent.h"
+#include "Public/ECS_Components/ColliderComponent.h"
 #include "Public/Entity.h"
-
 #include "Private/NativeScript.h"
+#include <algorithm>
 
 void ScriptSystem::AddComponent(Component* _comp)
 {
@@ -20,36 +21,47 @@ void ScriptSystem::Update()
         {
             comp->m_instance->OnStart();
             comp->m_started = true;
-		}
+        }
 
         comp->m_instance->OnUpdate();
 
         if (comp->GetOwner()->HasToBeDestroyed())
         {
-			comp->m_instance->OnDestroy();
+            comp->m_instance->OnDestroy();
         }
 
-        if (comp->m_isColliding)
+        ColliderComponent* collider = comp->GetOwner()->GetComponent<ColliderComponent>();
+        if (collider == nullptr) {
+            collider = comp->GetOwner()->GetComponentInHierarchy<ColliderComponent>();
+        }  
+
+        if (collider)
         {
-            if (comp->m_wasColliding == false)
+            const std::vector<Entity*>& currentCollisions = collider->m_entitiesCollided;
+            std::vector<Entity*>& lastCollisions = comp->m_lastEntitiesCollided;
+
+            for (Entity* otherEntity : currentCollisions)
             {
-                comp->m_instance->OnCollisionEnter();
+                if (std::find(lastCollisions.begin(), lastCollisions.end(), otherEntity) == lastCollisions.end())
+                {
+                    comp->m_instance->OnCollisionEnter(otherEntity);
+                }
+                else
+                {
+                    comp->m_instance->OnCollision(otherEntity);
+                }
             }
-            else
+
+            for (Entity* oldEntity : lastCollisions)
             {
-                comp->m_instance->OnCollision();
+                if (std::find(currentCollisions.begin(), currentCollisions.end(), oldEntity) == currentCollisions.end())
+                {
+                    comp->m_instance->OnCollisionExit(oldEntity);
+                }
             }
+
+            comp->m_lastEntitiesCollided = currentCollisions;
         }
-        else
-        {
-            if (comp->m_wasColliding == true)
-            {
-                comp->m_instance->OnCollisionExit();
-            }
-        }
-        comp->m_wasColliding = comp->m_isColliding;
-        comp->m_isColliding = false;
-  
     }
 
     m_scripts.clear();

@@ -4,7 +4,8 @@ class Entity;
 
 class NativeScript
 {
-public:
+protected:
+
     Entity* owner = nullptr;
 
     virtual ~NativeScript() = default;
@@ -12,11 +13,11 @@ public:
     virtual void OnStart() {}
     virtual void OnUpdate() {}
     virtual void OnDestroy() {}
-    virtual void OnCollisionEnter() {}
-    virtual void OnCollision() {}
-    virtual void OnCollisionExit() {}
 
-    virtual void OnCollisionEnter(Entity* other) { OnCollisionEnter(); }
-    virtual void OnCollision(Entity* other) { OnCollision(); }
-    virtual void OnCollisionExit(Entity* other) { OnCollisionExit(); }
+    virtual void OnCollisionEnter(Entity* other) {}
+    virtual void OnCollision(Entity* other) {}
+    virtual void OnCollisionExit(Entity* other) {}
+
+    friend class ScriptComponent;
+    friend class ScriptSystem;
 };

@@ -395,11 +395,9 @@ void TransformComponent::UpdateWorldDirections()
 
 void TransformComponent::NewParent()
 {
-    RemoveParent();
-    UpdateLocalPosition();
-    UpdateLocalScale();
-    UpdateLocalRotation();
-    UpdateLocalDirections();
+    UpdateWorldScale();
+    UpdateWorldRotation();
+    UpdateWorldPosition();
     UpdateMatrix();
 }
 

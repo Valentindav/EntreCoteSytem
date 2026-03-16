@@ -236,37 +236,4 @@ inline void Inputs::BindToWindow(WindowType* window)
 {
     s_windowHandle = window->GetHwnd();
     Initialize(s_windowHandle);
-
-    window->OnKeyDown = [](WPARAM wParam) {
-        Keyboard::Key key = VKToKeyboardEnum(wParam);
-        if (key != (Keyboard::Key)-1)
-            Inputs::OnKeyDown(key);
-        };
-
-    window->OnKeyUp = [](WPARAM wParam) {
-        Keyboard::Key key = VKToKeyboardEnum(wParam);
-        if (key != (Keyboard::Key)-1)
-            Inputs::OnKeyUp(key);
-        };
-
-    window->OnMouseDown = [](WPARAM btnState, int x, int y) {
-        Mouse::Button key = VKToMouseEnum(btnState);
-        if (key != (Mouse::Button)-1)
-            Inputs::OnMouseDown(key);
-        };
-       
-
-    window->OnMouseUp = [](WPARAM btnState, int x, int y) {
-        Mouse::Button key = VKToMouseEnum(btnState);
-        if (key != (Mouse::Button)-1)
-            Inputs::OnMouseUp(key);
-        };
-
-    window->OnMouseMove = [](int x, int y) {
-        Inputs::OnMouseMove(x, y);
-        };
-
-    window->OnMouseWheel = [](float delta) {
-        Inputs::OnMouseWheel(delta);
-        };
 }

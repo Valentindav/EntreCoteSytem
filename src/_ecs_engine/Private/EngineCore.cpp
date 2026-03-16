@@ -69,6 +69,8 @@ void EngineCore::Init(HINSTANCE hInstance, int width, int height, bool fullscree
     m_ecs = std::unique_ptr<ECS>(new ECS());
     m_ecs->Init();
 
+    Inputs::BindToWindow(m_window.get());
+
     HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (FAILED(hr)) {
     }
@@ -85,7 +87,7 @@ void EngineCore::Init(HINSTANCE hInstance, int width, int height, bool fullscree
     std::thread loadingThread([this]() {
         if (this->OnInit) {
             this->OnInit();
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            //std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         this->m_loadingFinished = true;
         });

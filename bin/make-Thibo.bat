@@ -1,2 +1,0 @@
-SolutionGenerator.exe -bp -make 33333333-CCCC-CCCC-CCCC-333333333333
-PAUSE

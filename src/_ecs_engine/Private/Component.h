@@ -21,6 +21,7 @@ namespace ComponentType
 		Light,
 		Animator,
 		ParticleEmitter,
+		Tag,
 		Count
 	};
 }

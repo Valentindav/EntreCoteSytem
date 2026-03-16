@@ -31,8 +31,6 @@ public:
 
     int m_motionType = MotionType::Dynamic;
 
-    bool m_trigger = true;
-
     MotionProperties m_motionProperties;
     MassProperties m_massProperties;
 

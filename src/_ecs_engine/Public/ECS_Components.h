@@ -24,3 +24,4 @@
 
 // -- Scripting --
 #include "ECS_Components/ScriptComponent.h"
+#include "ECS_Components/TagComponent.h"

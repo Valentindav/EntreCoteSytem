@@ -42,10 +42,10 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [
-                "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
-                "0CC134BC-5539-7F27-2116-565037005F82"
-            ],
+          "dependencies": [
+            "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
+            "0CC134BC-5539-7F27-2116-565037005F82"
+          ],
             "dependents": [
                 "11111111-AAAA-AAAA-AAAA-111111111111",
                 "22222222-BBBB-BBBB-BBBB-222222222222",
@@ -70,62 +70,13 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [
-                "0CC134BC-5539-7F27-2116-565037005F82"
-            ],
+          "dependencies": [
+            "0CC134BC-5539-7F27-2116-565037005F82"
+          ],
             "dependents": [
-                "4E6D0938-2D50-500E-5570-6C6922537F86"
+              "4E6D0938-2D50-500E-5570-6C6922537F86"
             ],
             "name": "_ecs_render",
-            "property-lib": true,
-            "property-pch": false,
-            "property-vcpkg": false,
-            "property-window": false
-        },
-        "AAAAAAAA-1111-1111-1111-AAAAAAAAAAAA": {
-            "config-debug": {
-                "additionalDependencies": [
-                    "xaudio2.lib",
-                    "mfplat.lib",
-                    "mf.lib",
-                    "mfreadwrite.lib",
-                    "mfuuid.lib",
-                    "mfcore.lib",
-                    "dxguid.lib",
-                    "ole32.lib",
-                    "propsys.lib"
-                ],
-                "additionalIncludeDirectories": [
-                    "."
-                ],
-                "additionalLibraryDirectories": [],
-                "preprocessorDefinitions": []
-            },
-            "config-release": {
-                "additionalDependencies": [
-                    "xaudio2.lib",
-                    "mfplat.lib",
-                    "mf.lib",
-                    "mfreadwrite.lib",
-                    "mfuuid.lib",
-                    "mfcore.lib",
-                    "dxguid.lib",
-                    "ole32.lib",
-                    "propsys.lib"
-                ],
-                "additionalIncludeDirectories": [
-                    "."
-                ],
-                "additionalLibraryDirectories": [],
-                "preprocessorDefinitions": []
-            },
-            "dependencies": [],
-            "dependents": [
-                "11111111-AAAA-AAAA-AAAA-111111111111",
-                "22222222-BBBB-BBBB-BBBB-222222222222",
-                "33333333-CCCC-CCCC-CCCC-333333333333"
-            ],
-            "name": "Audio",
             "property-lib": true,
             "property-pch": false,
             "property-vcpkg": false,
@@ -135,8 +86,7 @@
             "config-debug": {
                 "additionalDependencies": [],
                 "additionalIncludeDirectories": [
-                    "../../src/_ecs_engine/Public",
-                    "../../src"
+                    "../../src/_ecs_engine/Public"
                 ],
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
@@ -144,99 +94,30 @@
             "config-release": {
                 "additionalDependencies": [],
                 "additionalIncludeDirectories": [
-                    "../../src/_ecs_engine/Public",
-                    "../../src"
+                    "../../src/_ecs_engine/Public"
                 ],
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [
-                "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
-                "0CC134BC-5539-7F27-2116-565037005F82",
-                "4E6D0938-2D50-500E-5570-6C6922537F86",
-                "AAAAAAAA-1111-1111-1111-AAAAAAAAAAAA"
-            ],
+          "dependencies": [
+            "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
+            "0CC134BC-5539-7F27-2116-565037005F82",
+            "4E6D0938-2D50-500E-5570-6C6922537F86"
+          ],
             "dependents": [],
-            "name": "test-Ryad",
-            "property-lib": false,
-            "property-pch": false,
-            "property-vcpkg": false,
-            "property-window": true
-        },
-        "22222222-BBBB-BBBB-BBBB-222222222222": {
-            "config-debug": {
-                "additionalDependencies": [],
-                "additionalIncludeDirectories": [
-                    "../../src/_ecs_engine/Public",
-                    "../../src"
-                ],
-                "additionalLibraryDirectories": [],
-                "preprocessorDefinitions": []
-            },
-            "config-release": {
-                "additionalDependencies": [],
-                "additionalIncludeDirectories": [
-                    "../../src/_ecs_engine/Public",
-                    "../../src"
-                ],
-                "additionalLibraryDirectories": [],
-                "preprocessorDefinitions": []
-            },
-            "dependencies": [
-                "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
-                "0CC134BC-5539-7F27-2116-565037005F82",
-                "4E6D0938-2D50-500E-5570-6C6922537F86",
-                "AAAAAAAA-1111-1111-1111-AAAAAAAAAAAA"
-            ],
-            "dependents": [],
-            "name": "Gameplay",
-            "property-lib": false,
-            "property-pch": false,
-            "property-vcpkg": false,
-            "property-window": true
-        },
-        "33333333-CCCC-CCCC-CCCC-333333333333": {
-            "config-debug": {
-                "additionalDependencies": [],
-                "additionalIncludeDirectories": [
-                    "../../src/_ecs_engine/Public",
-                    "../../src"
-                ],
-                "additionalLibraryDirectories": [],
-                "preprocessorDefinitions": []
-            },
-            "config-release": {
-                "additionalDependencies": [],
-                "additionalIncludeDirectories": [
-                    "../../src/_ecs_engine/Public",
-                    "../../src"
-                ],
-                "additionalLibraryDirectories": [],
-                "preprocessorDefinitions": []
-            },
-            "dependencies": [
-                "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
-                "0CC134BC-5539-7F27-2116-565037005F82",
-                "4E6D0938-2D50-500E-5570-6C6922537F86",
-                "AAAAAAAA-1111-1111-1111-AAAAAAAAAAAA"
-            ],
-            "dependents": [],
-            "name": "test-thibault",
+            "name": "prototype",
             "property-lib": false,
             "property-pch": false,
             "property-vcpkg": false,
             "property-window": true
         }
     },
-    "projects_name_to_guid": {
-        "_ecs_render": "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
-        "_ecs_engine": "4E6D0938-2D50-500E-5570-6C6922537F86",
-        "_ecs_core": "0CC134BC-5539-7F27-2116-565037005F82",
-        "Audio": "AAAAAAAA-1111-1111-1111-AAAAAAAAAAAA",
-        "test-Ryad": "11111111-AAAA-AAAA-AAAA-111111111111",
-        "Gameplay": "22222222-BBBB-BBBB-BBBB-222222222222",
-        "test-thibault": "33333333-CCCC-CCCC-CCCC-333333333333"
-    },
+  "projects_name_to_guid": {
+    "_ecs_render": "5D5D6AE2-2D64-6F1D-6EE2-3EB747FD4F4D",
+    "_ecs_engine": "4E6D0938-2D50-500E-5570-6C6922537F86",
+    "_ecs_core": "0CC134BC-5539-7F27-2116-565037005F82",
+    "museum": "11111111-AAAA-AAAA-AAAA-111111111111"
+  },
     "solution_guid": "58E359CF-7FF0-0E0E-30A2-36CD1C877CDE",
     "solution_name": "EntreCoteSystem",
     "startup_project": "",

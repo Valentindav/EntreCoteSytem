@@ -1,11 +1,10 @@
 #include "PhysicSystem.h"
-#include "Public/ECS_Components/ScriptComponent.h"
 #include "Public/ECS_Components/RigidBodyComponent.h"
 #include "Public/ECS_Components/ColliderComponent.h"
 #include "Public/ECS_Components/TransformComponent.h"
 #include "Public/ECS.h"
-
 #include "Private/EngineCore.h"
+#include <algorithm>
 
 const DirectX::XMVECTOR GRAVITY = DirectX::XMVectorSet(0.0f, -9.81f, 0.0f, 0.0f);
 
@@ -17,7 +16,8 @@ void PhysicSystem::UpdateAABB(ColliderComponent* collider, TransformComponent* t
     XMFLOAT3 worldScale = transform->GetWorldScale();
 
     XMVECTOR vPos = XMLoadFloat3(&worldPos);
-    XMVECTOR vOffset = XMLoadFloat3(&collider->m_offset);
+    XMFLOAT3 offset = { 0.f, 0.f, 0.f };
+    XMVECTOR vOffset = XMLoadFloat3(&offset);
     XMVECTOR vCenter = XMVectorAdd(vPos, vOffset);
 
     XMFLOAT3 center;
@@ -46,7 +46,7 @@ void PhysicSystem::AddComponent(Component* _comp)
 {
     if (_comp->GetType() == ComponentType::Collider)
     {
-		m_colliders.push_back(static_cast<ColliderComponent*>(_comp));
+        m_colliders.push_back(static_cast<ColliderComponent*>(_comp));
     }
     if (_comp->GetType() == ComponentType::RigidBody)
     {
@@ -72,6 +72,8 @@ void PhysicSystem::Update()
 
         for (ColliderComponent* col : m_colliders)
         {
+            col->m_entitiesCollided.clear();
+
             Entity* owner = col->GetOwner();
             if (owner)
             {
@@ -92,7 +94,6 @@ void PhysicSystem::Update()
 
 void PhysicSystem::UpdatePhysic(RigidBodyComponent* rb, float dt)
 {
-
     int entityID = rb->GetOwnerID();
     Entity* entity = ECS_ENGINE->GetECS()->GetEntity(entityID);
     if (!entity) return;
@@ -103,30 +104,23 @@ void PhysicSystem::UpdatePhysic(RigidBodyComponent* rb, float dt)
     XMVECTOR vVel = XMLoadFloat3(&rb->m_motionProperties.linearVelocity);
     XMVECTOR vForce = XMLoadFloat3(&rb->m_forceAccumulator);
 
-    // Gravity --------------------------------------------------------------------
-
+    // Gravity
     if (rb->m_useGravity) {
-
         XMVECTOR vGravityForce = XMVectorScale(GRAVITY, rb->m_massProperties.mass);
         vForce = XMVectorAdd(vForce, vGravityForce);
     }
 
-    // Int�gration de Newton (F = ma => a = F * (1/m))
+    // Intégration de Newton (F = ma => a = F * (1/m))
     XMVECTOR vAccel = XMVectorScale(vForce, rb->m_massProperties.inverseMass);
-
     XMStoreFloat3(&rb->m_motionProperties.acceleration, vAccel);
 
     // Vitesse += Acceleration * dt
     vVel = XMVectorAdd(vVel, XMVectorScale(vAccel, dt));
 
-    // Friction --------------------------------------------------------------------
-
-    // Vitesse *= Damping * dt (approximation simple : V *= Damping)
+    // Friction
     vVel = XMVectorScale(vVel, rb->m_motionProperties.linearDamping);
 
-    // Deplacement -----------------------------------------------------------------
-
-    // Position += Vitesse * dt
+    // Deplacement
     vPos = XMVectorAdd(vPos, XMVectorScale(vVel, dt));
 
     XMFLOAT3 newPos = transform->GetWorldPosition();
@@ -143,7 +137,6 @@ void PhysicSystem::BroadPhase()
 {
     m_grid.clear();
 
-    // --- 1. Partitionning ---
     for (int i = 0; i < m_colliders.size(); i++)
     {
         AABB& aabb = m_colliders[i]->m_aabb;
@@ -176,7 +169,6 @@ void PhysicSystem::BroadPhase()
                 int idxA = cellIndices[i];
                 int idxB = cellIndices[j];
 
-                // --- 1. Partitionning ---
                 if (m_colliders[idxA]->m_aabb.Intersects(m_colliders[idxB]->m_aabb))
                 {
                     int idA = m_colliders[idxA]->mOwnerID;
@@ -204,58 +196,45 @@ void PhysicSystem::NarrowPhase()
         Entity* eA = ecs->GetEntity(pair.first);
         Entity* eB = ecs->GetEntity(pair.second);
 
-        // V�rification de s�curit�
         if (!eA || !eB) continue;
 
-        ColliderComponent* cA = eA->GetComponents<ColliderComponent>()[0];
-        ColliderComponent* cB = eB->GetComponents<ColliderComponent>()[0];
-        RigidBodyComponent* rbA = eA->GetComponents<RigidBodyComponent>()[0];
-        RigidBodyComponent* rbB = eB->GetComponents<RigidBodyComponent>()[0];
+        auto collidersA = eA->GetComponents<ColliderComponent>();
+        auto collidersB = eB->GetComponents<ColliderComponent>();
+
+        if (collidersA.empty() || collidersB.empty()) continue;
+
+        ColliderComponent* cA = collidersA[0];
+        ColliderComponent* cB = collidersB[0];
         TransformComponent* tA = &eA->transform;
         TransformComponent* tB = &eB->transform;
 
         CollisionManifold manifold = { eA, eB, {0,0,0}, 0, false };
 
-        if (cA->m_type == ColliderType::Sphere && cB->m_type == ColliderType::Sphere)
-        {
+        if (cA->m_type == ColliderType::Sphere && cB->m_type == ColliderType::Sphere) {
             manifold = CheckSphereSphere(cA, tA, cB, tB);
         }
-        else if (cA->m_type == ColliderType::Box && cB->m_type == ColliderType::Box)
-        {
+        else if (cA->m_type == ColliderType::Box && cB->m_type == ColliderType::Box) {
             manifold = CheckBoxBox(cA, tA, cB, tB);
         }
-        else if (cA->m_type == ColliderType::Sphere && cB->m_type == ColliderType::Box)
-        {
+        else if (cA->m_type == ColliderType::Sphere && cB->m_type == ColliderType::Box) {
             manifold = CheckSphereBox(cA, tA, cB, tB);
         }
-        else if (cA->m_type == ColliderType::Box && cB->m_type == ColliderType::Sphere)
-        {
+        else if (cA->m_type == ColliderType::Box && cB->m_type == ColliderType::Sphere) {
             manifold = CheckSphereBox(cB, tB, cA, tA);
             manifold.normal.x *= -1; manifold.normal.y *= -1; manifold.normal.z *= -1;
             std::swap(manifold.entityA, manifold.entityB);
         }
 
         if (manifold.hasCollision)
-        {   
-            ScriptComponent* scriptComp1 = cA->GetOwner()->GetComponent<ScriptComponent>();
-            ScriptComponent* scriptComp2 = cB->GetOwner()->GetComponent<ScriptComponent>();
-
-            if (scriptComp1 != nullptr)
-            {
-                scriptComp1->m_isColliding = true;
-                if (scriptComp1->m_instance)
-                    scriptComp1->m_instance->OnCollisionEnter(manifold.entityB);
+        {
+            if (std::find(cA->m_entitiesCollided.begin(), cA->m_entitiesCollided.end(), manifold.entityB) == cA->m_entitiesCollided.end()) {
+                cA->m_entitiesCollided.push_back(manifold.entityB);
+            }
+            if (std::find(cB->m_entitiesCollided.begin(), cB->m_entitiesCollided.end(), manifold.entityA) == cB->m_entitiesCollided.end()) {
+                cB->m_entitiesCollided.push_back(manifold.entityA);
             }
 
-            if (scriptComp2 != nullptr)
-            {
-                scriptComp2->m_isColliding = true;
-                if (scriptComp2->m_instance)
-                    scriptComp2->m_instance->OnCollisionEnter(manifold.entityA);
-
-            }
-
-            if (rbA->m_trigger == true && rbB->m_trigger)
+            if (!cA->m_isTrigger && !cB->m_isTrigger)
             {
                 ResolveCollision(manifold);
             }
@@ -284,8 +263,6 @@ CollisionManifold PhysicSystem::CheckSphereSphere(ColliderComponent* A, Transfor
 
     if (dist < radiusSum)
     {
-        //std::cout << "collision Sphere/Sphere\n";
-
         m.hasCollision = true;
         m.depth = radiusSum - dist;
 
@@ -313,7 +290,7 @@ CollisionManifold PhysicSystem::CheckBoxBox(ColliderComponent* A, TransformCompo
     XMVECTOR pA = XMLoadFloat3(&worldPosA);
     XMVECTOR pB = XMLoadFloat3(&worldPosB);
 
-    XMVECTOR vCenterDiff = XMVectorSubtract(pB, pA); // Vecteur de A vers B
+    XMVECTOR vCenterDiff = XMVectorSubtract(pB, pA);
 
     XMMATRIX matA = XMLoadFloat4x4(&tA->GetWorldMatrix());
     XMMATRIX matB = XMLoadFloat4x4(&tB->GetWorldMatrix());
@@ -333,7 +310,6 @@ CollisionManifold PhysicSystem::CheckBoxBox(ColliderComponent* A, TransformCompo
         abs(B->m_boxHalfSize.y * scaleB.y),
         abs(B->m_boxHalfSize.z * scaleB.z), 0.0f);
 
-    // Retourne true si collision sur cet axe, false si s�paration trouv�e
     auto TestAxis = [&](XMVECTOR axis) -> bool
         {
             if (XMVectorGetX(XMVector3LengthSq(axis)) < 0.0001f) return true;
@@ -352,10 +328,8 @@ CollisionManifold PhysicSystem::CheckBoxBox(ColliderComponent* A, TransformCompo
 
             float penetration = (rA + rB) - distProj;
 
-            // Si n�gatif : Il y a un espace vide -> Pas de collision
             if (penetration < 0) return false;
 
-            // On cherche la plus petite p�n�tration
             if (penetration < minPenetration)
             {
                 minPenetration = penetration;
@@ -364,23 +338,16 @@ CollisionManifold PhysicSystem::CheckBoxBox(ColliderComponent* A, TransformCompo
             return true;
         };
 
-    // Test des 15 axes (3 normales A / B, produits vectoriels des normales -> 3 + 3 + 3*3 = 15)
-
-    // Groupe 1 : Les 3 axes de A (Faces de A)
     for (int i = 0; i < 3; i++) if (!TestAxis(axisA[i])) return m;
 
-    // Groupe 2 : Les 3 axes de B (Faces de B)
     for (int i = 0; i < 3; i++) if (!TestAxis(axisB[i])) return m;
 
-    // Groupe 3 : Les 9 axes produits vectoriels (Ar�tes A x Ar�tes B)
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             XMVECTOR crossAxis = XMVector3Cross(axisA[i], axisB[j]);
             if (!TestAxis(crossAxis)) return m;
         }
     }
-
-    //std::cout << "collision Box/Box\n";
 
     m.hasCollision = true;
     m.depth = minPenetration;
@@ -396,50 +363,89 @@ CollisionManifold PhysicSystem::CheckBoxBox(ColliderComponent* A, TransformCompo
 }
 
 CollisionManifold PhysicSystem::CheckSphereBox(ColliderComponent* A, TransformComponent* tA, ColliderComponent* B, TransformComponent* tB)
-{ 
-    // TODO : impl�menter
+{
     return CollisionManifold();
 }
 
 void PhysicSystem::ResolveCollision(const CollisionManifold& m)
 {
-    auto rbsA = m.entityA->GetComponents<RigidBodyComponent>();
-    auto rbsB = m.entityB->GetComponents<RigidBodyComponent>();
+    if (!m.entityA || !m.entityB) return;
 
-    RigidBodyComponent* rbA = rbsA.empty() ? nullptr : rbsA[0];
-    RigidBodyComponent* rbB = rbsB.empty() ? nullptr : rbsB[0];
+    RigidBodyComponent* rbA = m.entityA->GetComponentInHierarchy<RigidBodyComponent>();
+    RigidBodyComponent* rbB = m.entityB->GetComponentInHierarchy<RigidBodyComponent>();
 
     if (!rbA && !rbB) return;
 
-    float invMassA = (rbA) ? rbA->m_massProperties.inverseMass : 0.0f;
-    float invMassB = (rbB) ? rbB->m_massProperties.inverseMass : 0.0f;
-    float totalInvMass = invMassA + invMassB;
+    TransformComponent* transformA = rbA ? &rbA->GetOwner()->transform : &m.entityA->transform;
+    TransformComponent* transformB = rbB ? &rbB->GetOwner()->transform : &m.entityB->transform;
 
-    if (totalInvMass == 0.0f) return;
+    bool dynA = (rbA && rbA->m_motionType == MotionType::Dynamic);
+    bool dynB = (rbB && rbB->m_motionType == MotionType::Dynamic);
+    bool kinA = (rbA && rbA->m_motionType == MotionType::Kinematic);
+    bool kinB = (rbB && rbB->m_motionType == MotionType::Kinematic);
+    bool statA = (!rbA || rbA->m_motionType == MotionType::Static);
+    bool statB = (!rbB || rbB->m_motionType == MotionType::Static);
+
+    float moveA = 0.0f;
+    float moveB = 0.0f;
+
+    if (dynA && dynB) {
+        moveA = rbA->m_massProperties.inverseMass;
+        moveB = rbB->m_massProperties.inverseMass;
+    }
+    else if (dynA) {
+        moveA = 1.0f; moveB = 0.0f;
+    }
+    else if (dynB) {
+        moveA = 0.0f; moveB = 1.0f;
+    }
+    else if (kinA && statB) {
+        moveA = 1.0f; moveB = 0.0f;
+    }
+    else if (statA && kinB) {
+        moveA = 0.0f; moveB = 1.0f;
+    }
+    else if (kinA && kinB) {
+        moveA = 0.5f; moveB = 0.5f;
+    }
+    else {
+        return;
+    }
+
+    float totalMove = moveA + moveB;
+    if (totalMove <= 0.0f) return;
 
     float percent = 0.8f;
     float slop = 0.01f;
     XMVECTOR vNormal = XMLoadFloat3(&m.normal);
 
-    float correctionMagnitude = (max(m.depth - slop, 0.0f) / totalInvMass) * percent;
+    float correctionMagnitude = (max(m.depth - slop, 0.0f) / totalMove) * percent;
     XMVECTOR vCorrection = XMVectorScale(vNormal, correctionMagnitude);
 
-    if (rbA && rbA->m_motionType == MotionType::Dynamic)
+    if (moveA > 0.0f)
     {
         XMFLOAT3 delta;
-        XMStoreFloat3(&delta, XMVectorScale(vCorrection, -invMassA));
-        m.entityA->transform.WorldTranslate(delta);
+        XMStoreFloat3(&delta, XMVectorScale(vCorrection, -moveA));
+        transformA->WorldTranslate(delta);
     }
 
-    if (rbB && rbB->m_motionType == MotionType::Dynamic)
+    if (moveB > 0.0f)
     {
         XMFLOAT3 delta;
-        XMStoreFloat3(&delta, XMVectorScale(vCorrection, invMassB));
-        m.entityB->transform.WorldTranslate(delta);
+        XMStoreFloat3(&delta, XMVectorScale(vCorrection, moveB));
+        transformB->WorldTranslate(delta);
     }
 
-    XMVECTOR velA = (rbA) ? XMLoadFloat3(&rbA->m_motionProperties.linearVelocity) : XMVectorZero();
-    XMVECTOR velB = (rbB) ? XMLoadFloat3(&rbB->m_motionProperties.linearVelocity) : XMVectorZero();
+    if (!dynA && !dynB) return;
+
+    float invMassA = dynA ? rbA->m_massProperties.inverseMass : 0.0f;
+    float invMassB = dynB ? rbB->m_massProperties.inverseMass : 0.0f;
+    float totalInvMass = invMassA + invMassB;
+
+    if (totalInvMass <= 0.0f) return;
+
+    XMVECTOR velA = (dynA) ? XMLoadFloat3(&rbA->m_motionProperties.linearVelocity) : XMVectorZero();
+    XMVECTOR velB = (dynB) ? XMLoadFloat3(&rbB->m_motionProperties.linearVelocity) : XMVectorZero();
 
     XMVECTOR relativeVel = XMVectorSubtract(velB, velA);
     float velAlongNormal = XMVectorGetX(XMVector3Dot(relativeVel, vNormal));
@@ -455,15 +461,13 @@ void PhysicSystem::ResolveCollision(const CollisionManifold& m)
 
     XMVECTOR impulse = XMVectorScale(vNormal, j);
 
-    if (rbA && rbA->m_motionType == MotionType::Dynamic) {
+    if (dynA) {
         XMVECTOR newVelA = XMVectorSubtract(velA, XMVectorScale(impulse, invMassA));
         XMStoreFloat3(&rbA->m_motionProperties.linearVelocity, newVelA);
     }
 
-    if (rbB && rbB->m_motionType == MotionType::Dynamic) {
+    if (dynB) {
         XMVECTOR newVelB = XMVectorAdd(velB, XMVectorScale(impulse, invMassB));
         XMStoreFloat3(&rbB->m_motionProperties.linearVelocity, newVelB);
     }
-
-	//std::cout << rbA->m_forceAccumulator.y << "\n";
 }

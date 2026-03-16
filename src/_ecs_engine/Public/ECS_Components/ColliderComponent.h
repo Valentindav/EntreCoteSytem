@@ -3,6 +3,7 @@
 
 #include <DirectXMath.h>
 #include <algorithm>
+#include <vector>
 
 using namespace DirectX;
 
@@ -28,9 +29,11 @@ class ColliderComponent : public Component
 public:
     ColliderType m_type;
 
-    XMFLOAT3 m_offset = { 0.f, 0.f, 0.f };
-
     AABB m_aabb;
+
+    bool m_isTrigger = false;
+
+    std::vector<Entity*> m_entitiesCollided;
 
     union {
         // Données pour une Sphère

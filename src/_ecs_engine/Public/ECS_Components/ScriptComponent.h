@@ -1,6 +1,8 @@
 #pragma once
-#include "private/Component.h"
+#include "Private/Component.h"
 #include "Private/NativeScript.h"
+#include <vector>
+#include <algorithm>
 
 class ScriptComponent : public Component
 {
@@ -17,27 +19,47 @@ public:
     }
 
     template<typename T>
-    void SetScript()
+    T* SetScript()
     {
         if (m_instance) {
             delete m_instance;
         }
-
         m_instance = new T();
-
         if (m_instance) {
             m_instance->owner = GetOwner();
         }
+        return dynamic_cast<T*>(m_instance);
+    }
+
+    template<typename T>
+    T* GetScript()
+    {
+        return dynamic_cast<T*>(m_instance);
+    }
+
+    NativeScript* GetScript()
+    {
+        return m_instance;
+    }
+
+    template<typename T>
+    bool IsScript()
+    {
+        if (m_instance == nullptr) {
+            return false;
+        }
+        if (dynamic_cast<T*>(m_instance) == nullptr) {
+            return false;
+        }
+        return true;
     }
 
     virtual const ComponentType::Type GetType() override { return ComponentType::Script; }
 
 private:
     bool m_started = false;
-    bool m_wasColliding = false;
-    bool m_isColliding = false;
+
+    std::vector<Entity*> m_lastEntitiesCollided;
 
     friend class ScriptSystem;
-    friend class PhysicSystem;
-
 };

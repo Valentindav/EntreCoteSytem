@@ -7,6 +7,8 @@
 #include "Public/ECS.h"
 #include "Public/Application.h"
 #include "Public/Utils.h"
+#include "Public/Physics.h"
+#include "Public/RaycastHit.h"
 
 #include <Windows.h>
 #include <GameTimer.h>

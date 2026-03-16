@@ -4,18 +4,34 @@
 
 void Entity::AddChild(Entity* child)
 {
-    if (child->GetParent() == this) return;
-    children.push_back(child);
+    if (child->parent != nullptr) {
+        child->parent->RemoveChild(child);
+    }
     child->parent = this;
+    children.push_back(child);
     child->transform.NewParent();
 }
 
 void Entity::RemoveChild(Entity* child)
 {
-    if (child->GetParent() != this) return;
-    for (int i = 0; i < children.size(); i++)
-        if (children[i] == child)
-            children.erase(children.begin() + i);
-    child->transform.RemoveParent();
-    child->parent = nullptr;
+    auto it = std::find(children.begin(), children.end(), child);
+    if (it != children.end()) {
+        children.erase(it);
+        child->parent = nullptr;
+        child->transform.NewParent();
+    }
+}
+
+void Entity::SetParent(Entity* parent) { parent->AddChild(this); }
+
+void Entity::RemoveParent() { parent->RemoveChild(this); }
+
+Entity* Entity::GetRoot()
+{
+    Entity* current = this;
+    while (current->parent != nullptr)
+    {
+        current = current->parent;
+    }
+    return current;
 }

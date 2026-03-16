@@ -99,6 +99,17 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
 
     switch (msg)
     {
+    case WM_SETCURSOR:
+        if (LOWORD(lParam) == HTCLIENT)
+        {
+            if (Inputs::IsMouseLocked() || !Inputs::IsCursorVisible())
+            {
+                SetCursor(NULL);
+                return TRUE;
+            }
+        }
+        break;
+
     case WM_ACTIVATE:
         if (LOWORD(wParam) == WA_INACTIVE)
         {

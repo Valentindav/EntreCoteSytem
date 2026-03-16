@@ -1,2 +1,0 @@
-SolutionGenerator.exe -bp -make 11111111-AAAA-AAAA-AAAA-111111111111
-PAUSE
