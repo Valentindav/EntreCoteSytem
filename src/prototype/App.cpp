@@ -73,6 +73,7 @@ void App::InitEntities()
     ScriptComponent* moveScriptComp = ecs->AddComponents<ScriptComponent>(player);
     PlayerMovementScript* moveScript = moveScriptComp->SetScript<PlayerMovementScript>();
     cameraPlayer = ECS_ECS->GetComponents<CameraComponent>()[0]->GetOwner();
+    ECS_ECS->GetComponents<CameraComponent>()[0]->m_renderCamera->SetLens(65.0f, 16/9, 0.00016f, 64.0f);
 
     moveScript->SetCamera(cameraPlayer);
     moveScript->SetHitbox(playerHitbox);

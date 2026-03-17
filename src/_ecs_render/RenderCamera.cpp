@@ -42,9 +42,9 @@ void RenderCamera::SetViewport(float width, float height, float topLeftX, float 
     m_viewport.MaxDepth = maxDepth;
 }
 
-void RenderCamera::SetLens(float fovY, float aspect, float zn, float zf)
+void RenderCamera::SetLens(float fovY, float aspect, float nearZ, float farZ)
 {
-    XMMATRIX P = XMMatrixPerspectiveFovLH(fovY, aspect, zn, zf);
+    XMMATRIX P = XMMatrixPerspectiveFovLH(fovY, aspect, nearZ, farZ);
 
     XMStoreFloat4x4(&mProj, P);
 }

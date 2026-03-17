@@ -12,7 +12,7 @@ public:
     void ApplyViewport(ID3D12GraphicsCommandList* cmdList) const;
 
     void SetViewport(float width, float height, float topLeftX = 0.0f, float topLeftY = 0.0f, float minDepth = 0.0f, float maxDepth = 1.0f);
-    void SetLens(float fovY, float aspect, float zn, float zf);
+    void SetLens(float fovY, float aspect, float nearZ, float farZ);
 
     void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
