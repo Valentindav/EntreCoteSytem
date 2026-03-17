@@ -42,7 +42,7 @@ void EngineCore::Init(HINSTANCE hInstance, int width, int height, bool fullscree
 
     m_window.OnResize = [this](int w, int h) { this->OnResize(); };
 
-    m_renderer.Initialize(m_window.GetHwnd(), m_window.GetClientWidth(), m_window.GetClientHeight());
+    m_renderer.Initialize(m_window.GetNativeHandle(), m_window.GetClientWidth(), m_window.GetClientHeight());
 
     m_resourceManager.Initialize(m_renderer.GetBufferConverter(), m_renderer.GetCommandDispatcher(), &m_graphicMutex);
 

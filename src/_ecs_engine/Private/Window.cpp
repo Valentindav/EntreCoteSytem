@@ -3,23 +3,12 @@
 #include <WindowsX.h>
 #include <cassert>
 
-Window* Window::sInstance = nullptr;
-
-Window::~Window()
+bool Window::Initialize(int width, int height, const std::wstring& caption)
 {
-    sInstance = nullptr;
-}
-
-bool Window::Initialize(HINSTANCE hInstance, int width, int height, const std::wstring& caption)
-{
-    mhAppInst = hInstance;
     mClientWidth = width;
     mClientHeight = height;
-    mMainWndCaption = caption;
-    mhMainWnd = nullptr;
-
-    assert(sInstance == nullptr && "Une seule Window autorisée pour le moment");
-    sInstance = this;
+    mTitle = caption;
+    mHandle = nullptr;
 
     return InitMainWindow();
 }
@@ -43,7 +32,7 @@ bool Window::ProcessMessages()
 
 void Window::SetWindowTitle(const std::wstring& text)
 {
-    SetWindowText(mhMainWnd, text.c_str());
+    SetWindowText(mHandle, text.c_str());
 }
 
 bool Window::InitMainWindow()
@@ -53,7 +42,7 @@ bool Window::InitMainWindow()
     wc.lpfnWndProc = WindowProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
-    wc.hInstance = mhAppInst;
+    wc.hInstance = mHandle;
     wc.hIcon = LoadIcon(0, IDI_APPLICATION);
     wc.hCursor = LoadCursor(0, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
@@ -66,23 +55,23 @@ bool Window::InitMainWindow()
         return false;
     }
 
-    // Calculer la taille de la fenêtre avec les bordures
+    // Calculer la taille de la fenetre avec les bordures
     RECT R = { 0, 0, mClientWidth, mClientHeight };
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
     int width = R.right - R.left;
     int height = R.bottom - R.top;
 
-    mhMainWnd = CreateWindow(L"MainWnd", mMainWndCaption.c_str(),
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mhAppInst, 0);
+    mHandle = CreateWindow(L"MainWnd", mTitle.c_str(),
+        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, inst, 0);
 
-    if (!mhMainWnd)
+    if (!mHandle)
     {
         MessageBox(0, L"CreateWindow Failed.", 0, 0);
         return false;
     }
 
-    ShowWindow(mhMainWnd, SW_SHOW);
-    UpdateWindow(mhMainWnd);
+    ShowWindow(mHandle, SW_SHOW);
+    UpdateWindow(mHandle);
 
     return true;
 }
@@ -90,8 +79,6 @@ bool Window::InitMainWindow()
 LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     Inputs::ProcessWindowsMessage(msg, wParam, lParam);
-
-    Window* win = Window::GetInstance();
 
     if (!win) return DefWindowProc(hwnd, msg, wParam, lParam);
 
@@ -154,8 +141,8 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
             }
             else if (win->mResizing)
             {
-                // Si on drag les bords, on ne fait rien tant que l'utilisateur n'a pas lâché (EXITSIZEMOVE)
-                // pour éviter de spammer le GPU de reconstruction de SwapChain
+                // Si on drag les bords, on ne fait rien tant que l'utilisateur n'a pas lï¿½chï¿½ (EXITSIZEMOVE)
+                // pour ï¿½viter de spammer le GPU de reconstruction de SwapChain
             }
             else
             {
